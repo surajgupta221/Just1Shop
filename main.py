@@ -4,9 +4,26 @@ from import_product import parse_iso_timestamp
 import import_product
 import firebase_admin
 from firebase_admin import credentials, firestore
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 
-# Initialize Firebase
-cred = credentials.Certificate("serviceAccountKey.json")
+# Load environment variables from .env file
+load_dotenv()
+
+# Initialize Firebase with path from .env or use default
+cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH", "serviceAccountKey.json")
+
+# Check if credentials file exists
+if not Path(cred_path).exists():
+    raise FileNotFoundError(
+        f"\n❌ Firebase credentials file not found: {cred_path}\n"
+        f"Please ensure serviceAccountKey.json is in the project root.\n"
+        f"You can download it from Firebase Console > Project Settings > Service Accounts > Generate New Private Key\n"
+        f"Then place it in: {Path('.').resolve() / cred_path}"
+    )
+
+cred = credentials.Certificate(cred_path)
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
@@ -58,6 +75,13 @@ def import_on_startup():
     except Exception as e:
         # Log but do not prevent app from starting
         print(f"Festival offer import failed on startup: {e}")
+    
+    try:
+        import_product.import_addresses(db=db)
+        print("Address import completed on startup.")
+    except Exception as e:
+        # Log but do not prevent app from starting
+        print(f"Address import failed on startup: {e}")
 
 # ----------------------------
 # GET ALL PRODUCTS
@@ -515,3 +539,83 @@ def add_festival_offer(festival_offer: dict):
 def delete_festival_offer(festival_offer_id: str):
     db.collection("festivalOffers").document(festival_offer_id).delete()
     return {"message": "Festival offer deleted successfully"}
+
+
+# ----------------------------
+# GET ALL ADDRESSES
+# ----------------------------
+@app.get("/address")
+def get_addresses():
+    addresses_ref = db.collection("address")
+    docs = addresses_ref.stream()
+
+    address_list = []
+    for doc in docs:
+        data = doc.to_dict()
+        data["id"] = doc.id
+
+        def _sanitize(v):
+            if v is None:
+                return None
+            if isinstance(v, (str, int, float, bool)):
+                return v
+            if isinstance(v, datetime):
+                return v.isoformat()
+            if isinstance(v, dict):
+                return {k: _sanitize(val) for k, val in v.items()}
+            if isinstance(v, (list, tuple)):
+                return [_sanitize(x) for x in v]
+            try:
+                return str(v)
+            except Exception:
+                return None
+
+        safe_data = {k: _sanitize(val) for k, val in data.items()}
+        address_list.append(safe_data)
+
+    return address_list
+
+
+# ----------------------------
+# ADD ADDRESS
+# ----------------------------
+@app.post("/add-address")
+def add_address(address: dict):
+    payload = address.copy()
+    doc_id = payload.pop("id", None)
+
+    # convert ISO date/datetime strings to datetime so Firestore stores timestamps
+    if isinstance(payload.get("createdAt"), str) and payload.get("createdAt"):
+        try:
+            payload["createdAt"] = parse_iso_timestamp(payload["createdAt"])
+        except Exception:
+            pass
+
+    coll = db.collection("address")
+    if doc_id:
+        coll.document(doc_id).set(payload)
+        return {"message": "Address added successfully", "id": doc_id}
+    else:
+        res = coll.add(payload)
+        # Handle Firestore return format
+        doc_ref = None
+        if isinstance(res, tuple) or isinstance(res, list):
+            for part in res:
+                if hasattr(part, "id"):
+                    doc_ref = part
+                    break
+        else:
+            if hasattr(res, "id"):
+                doc_ref = res
+
+        doc_id_out = getattr(doc_ref, "id", None)
+        return {"message": "Address added successfully", "id": doc_id_out}
+
+
+# ----------------------------
+# DELETE ADDRESS
+# ----------------------------
+@app.delete("/delete-address/{address_id}")
+def delete_address(address_id: str):
+    db.collection("address").document(address_id).delete()
+    return {"message": "Address deleted successfully"}

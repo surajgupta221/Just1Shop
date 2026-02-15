@@ -290,6 +290,54 @@ def import_festival_offers(db=None, data_path: Path | None = None):
             print(f"Added festival offer: {doc_ref}")
 
 
+def import_addresses(db=None, data_path: Path | None = None):
+    root = Path(__file__).parent
+    # allow custom data path for testing
+    data_file = Path(data_path) if data_path else (root / "address.json")
+    if not data_file.exists():
+        raise SystemExit("address.json not found.")
+
+    # If no Firestore client provided, initialize using local service account
+    if db is None:
+        cred_file = root / "serviceAccountKey.json"
+        if not cred_file.exists():
+            raise SystemExit("serviceAccountKey.json not found in project root.")
+
+        cred = credentials.Certificate(str(cred_file))
+        # initialize_app may be called elsewhere; avoid double-init
+        try:
+            initialize_app(cred)
+        except Exception:
+            # already initialized
+            pass
+        db = firestore.client()
+
+    with open(data_file, "r", encoding="utf-8") as f:
+        items = json.load(f)
+
+    for item in items:
+        doc_id = item.get("id")
+        payload = item.copy()
+        if "id" in payload:
+            del payload["id"]
+
+        # Convert createdAt timestamp
+        if isinstance(payload.get("createdAt"), str) and payload.get("createdAt"):
+            try:
+                payload["createdAt"] = parse_iso_timestamp(payload["createdAt"])
+            except Exception:
+                pass
+
+        coll = db.collection("address")
+        if doc_id:
+            doc_ref = coll.document(doc_id)
+            doc_ref.set(payload)
+            print(f"Written address with id={doc_id}")
+        else:
+            doc_ref = coll.add(payload)
+            print(f"Added address: {doc_ref}")
+
+
 def main():
     import_products()
     import_categories()
@@ -297,6 +345,7 @@ def main():
     import_banners()
     import_offers()
     import_festival_offers()
+    import_addresses()
 
 
 if __name__ == "__main__":
