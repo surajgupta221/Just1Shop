@@ -1,0 +1,29 @@
+[
+  {
+    "id": "1bannerIQLGHJmZwhumm",
+    "heading": "Today's deal",
+    "imgUrl": "https://firebasestorage.googleapis.com/v0/b/just1shop.appspot.com/o/users%2Fzb7TS4hqdmTkcptOzsIcm79Al2H2%2Fuploads%2F1725957076962000.jpeg?alt=media&token=e4647cfe-3531-4f0f-8a9c-a0d2b8f90d19",
+    "relatedProducts": [
+      "IoEUBSgN9SpOC7S2E1vP",
+      "SX4AC3FgJ9xrQRp8sh1Y",
+      "3QaYpeEBKkJXWiEcUOOt"
+    ]
+  },
+  {
+    "id": "2bannerIQLGHJmZwhumm",
+    "heading": "New Arrivals",
+    "imgUrl": "https://firebasestorage.googleapis.com/v0/b/just1shop.appspot.com/o/banners%2Fnew-arrivals.jpg",
+    "relatedProducts": [
+      "IoEUBSgN9SpOC7S2E1vP"
+    ]
+  },
+  {
+    "id": "3bannerIQLGHJmZwhumm",
+    "heading": "Best Sellers",
+    "imgUrl": "https://firebasestorage.googleapis.com/v0/b/just1shop.appspot.com/o/banners%2Fbest-sellers.jpg",
+    "relatedProducts": [
+      "SX4AC3FgJ9xrQRp8sh1Y",
+      "3QaYpeEBKkJXWiEcUOOt"
+    ]
+  }
+]

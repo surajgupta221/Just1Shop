@@ -1,0 +1,26 @@
+[
+  {
+    "id": "offerId123",
+    "productId": "prod_12345",
+    "title": "Buy 1 Get 1 Free",
+    "discountPercent": 50,
+    "validTill": "2026-02-28",
+    "createdAt": "2026-02-15T10:00:00Z"
+  },
+  {
+    "id": "offerId456",
+    "productId": "prod_67890",
+    "title": "25% Off on Spices",
+    "discountPercent": 25,
+    "validTill": "2026-03-15",
+    "createdAt": "2026-02-10T12:30:00Z"
+  },
+  {
+    "id": "offerId789",
+    "productId": "IoEUBSgN9SpOC7S2E1vP",
+    "title": "Extra 10% Off",
+    "discountPercent": 10,
+    "validTill": "2026-02-25",
+    "createdAt": "2026-02-01T08:15:00Z"
+  }
+]

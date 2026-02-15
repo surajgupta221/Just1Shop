@@ -1,0 +1,42 @@
+[
+  {
+    "id": "festival001",
+    "createdAt": "2024-10-04T07:43:57.000Z",
+    "festivalDetail": [
+      {
+        "createdAt": "2024-10-04T07:46:38.000Z",
+        "imgUrl": "https://firebasestorage.googleapis.com/v0/b/just1shop.appspot.com/o/users%2Fzb7TS4hqdmTkcptOzsIcm79Al2H2%2Fuploads%2F1728027991990000.jpg?alt=media&token=33aa6047-e7d8-44df-b756-5c702022f07c",
+        "name": "Rice",
+        "relatedProducts": [
+          "v0JbOtPZXzNO6XBXCv0x",
+          "nfrSXYQaNuSGXJ2feNUi",
+          "6mFmbtc8CoivCZVhAaYZ",
+          "zmAwAT0l9ETK7lzxf04G"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "festival002",
+    "createdAt": "2024-11-15T10:20:00.000Z",
+    "festivalDetail": [
+      {
+        "createdAt": "2024-11-15T10:25:00.000Z",
+        "imgUrl": "https://firebasestorage.googleapis.com/v0/b/just1shop.appspot.com/o/festivals%2Fdiwali.jpg",
+        "name": "Spices",
+        "relatedProducts": [
+          "IoEUBSgN9SpOC7S2E1vP",
+          "SX4AC3FgJ9xrQRp8sh1Y"
+        ]
+      },
+      {
+        "createdAt": "2024-11-15T11:00:00.000Z",
+        "imgUrl": "https://firebasestorage.googleapis.com/v0/b/just1shop.appspot.com/o/festivals%2Fdiwali-oils.jpg",
+        "name": "Oils",
+        "relatedProducts": [
+          "3QaYpeEBKkJXWiEcUOOt"
+        ]
+      }
+    ]
+  }
+]

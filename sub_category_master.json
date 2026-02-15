@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1subIQLGHJmZwhuzVQGxx",
+    "category": "House Hold",
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/just1shop.appspot.com/o/users%2Fzb7TS4hqdmTkcptOzsIcm79Al2H2%2Fuploads%2F1725072006125000.jpg?alt=media&token=e6a65b96-03fd-4e53-9b75-fe171ed60a5d",
+    "sub_category": "Glass Cleaners",
+    "sub_index": 1
+  },
+  {
+    "id": "2subIQLGHJmZwhuzVQGxx",
+    "category": "House Hold",
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/just1shop.appspot.com/o/categories%2Fdishwash.jpg",
+    "sub_category": "Dish Cleaners",
+    "sub_index": 2
+  },
+  {
+    "id": "3subIQLGHJmZwhuzVQGxx",
+    "category": "Spices",
+    "imageUrl": "https://firebasestorage.googleapis.com/v0/b/just1shop.appspot.com/o/categories%2Fspices.jpg",
+    "sub_category": "Spices & Seasonings",
+    "sub_index": 1
+  }
+]
