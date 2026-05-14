@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Products - Admin{% endblock %}
+{% block content %}
+<h2>Products</h2>
+<div style="margin:10px 0 20px 0">
+	<a class="btn btn-primary" href="/add-product">Add Product</a>
+</div>
+{% if products and products|length > 0 %}
+	{% set headers = products[0].keys()|list %}
+	<div class="table-section">
+		<table class="data-table">
+			<thead>
+				<tr>
+					{% for h in headers %}
+						<th>{{ h }}</th>
+					{% endfor %}
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for item in products %}
+					<tr>
+						{% for h in headers %}
+							{% set val = item.get(h) %}
+							<td>
+								{% if h == 'imageUrl' and val %}
+									{% set img_src = val[0] if (val is sequence and not val is string) else val %}
+									{% if img_src and img_src.startswith('http') %}
+										<img src="{{ img_src }}" style="max-width:120px;" />
+									{% else %}
+										<img src="{{ BACKEND_URL }}{{ img_src }}" style="max-width:120px;" />
+									{% endif %}
+								{% elif val is mapping or val is sequence and not val is string %}
+									<pre>{{ val|tojson(indent=2) }}</pre>
+								{% else %}
+									{{ val }}
+								{% endif %}
+							</td>
+						{% endfor %}
+						<td>
+							<button class="btn btn-sm btn-danger" onclick="confirmDelete('{{ item.id }}', this)">Delete</button>
+							<a class="btn btn-sm btn-secondary" href="/add-product?id={{ item.id }}">Edit</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% else %}
+	<div class="empty-state">
+		<p>No products found.</p>
+		<a href="/add-product" class="btn btn-primary">Add Product</a>
+	</div>
+{% endif %}
+{% endblock %}

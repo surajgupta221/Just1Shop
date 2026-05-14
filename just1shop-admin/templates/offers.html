@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Offers - Admin{% endblock %}
+{% block content %}
+<div class="page-header">
+	<h1>Offers</h1>
+	<a class="btn btn-primary" href="/add-offer">Add Offer</a>
+</div>
+<div class="table-controls" style="margin:1rem 0; display:flex; gap:1rem; align-items:center;">
+	<input id="searchOffers" class="form-control" placeholder="Search offers..." style="flex:1" />
+	<label style="white-space:nowrap">Rows:
+		<select id="offersPageSize" style="margin-left:0.5rem">
+			<option value="10">10</option>
+			<option value="20" selected>20</option>
+			<option value="50">50</option>
+		</select>
+	</label>
+</div>
+
+{% if offers and offers|length > 0 %}
+	<div class="table-section">
+		<table id="offersTable" class="data-table">
+			<thead>
+				<tr>
+					<th>Title</th>
+					<th>Product</th>
+					<th>Discount</th>
+					<th>Valid Till</th>
+					<th>Created</th>
+					<th>id</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for o in offers %}
+				<tr data-name="{{ o.title | default(o.id) }}">
+					  <td>{{ o.title }}</td>
+					  <td>{{ o.productId }}</td>
+					  <td>{{ o.discountPercent }}%</td>
+					  <td><span class="iso-date">{{ o.validTill }}</span></td>
+					  <td><span class="iso-date">{{ o.createdAt }}</span></td>
+					  <td>{{ o.applyTo if o.applyTo else 'all' }}</td>
+					  <td>{{ o.targetId if o.targetId else (o.productId if o.productId else '') }}</td>
+					<td>{{ o.id }}</td>
+					<td>
+						<button class="btn btn-sm btn-danger" onclick="confirmDelete('{{ o.id }}', this, 'offer')">Delete</button>
+						<a class="btn btn-sm btn-secondary" href="/add-offer?id={{ o.id }}">Edit</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% else %}
+	<div class="empty-state">
+		<p>No offers found.</p>
+		<a href="/add-offer" class="btn btn-primary">Add Offer</a>
+	</div>
+{% endif %}
+
+{% endblock %}

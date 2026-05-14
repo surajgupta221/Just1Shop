@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Add Offer - Admin{% endblock %}
+{% block content %}
+<h2>Add Offer</h2>
+<form method="post">
+  <div class="form-group">
+    <label>Title</label>
+    <input name="title" value="{{ offer.title if offer }}" />
+  </div>
+  <div class="form-group">
+    <label>Discount Percent</label>
+    <input name="discountPercent" type="number" value="{{ offer.discountPercent if offer }}" />
+  </div>
+  <div class="form-group">
+    <label>Valid Till</label>
+    <input name="validTill" type="date" value="{{ offer.validTill[:10] if offer and offer.validTill }}" />
+  </div>
+  <div class="form-group">
+    <label>Apply To</label>
+    <select name="applyTo">
+      <option value="all" {% if offer and offer.applyTo=='all' %}selected{% endif %}>All</option>
+      <option value="product" {% if offer and offer.applyTo=='product' %}selected{% endif %}>Product</option>
+      <option value="category" {% if offer and offer.applyTo=='category' %}selected{% endif %}>Category</option>
+      <option value="sub_category" {% if offer and offer.applyTo=='sub_category' %}selected{% endif %}>Sub-category</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label>Target ID (productId / categoryId / subCategoryId)</label>
+    <input name="targetId" value="{{ offer.targetId if offer }}" />
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Save Offer</button>
+  </div>
+</form>
+{% endblock %}

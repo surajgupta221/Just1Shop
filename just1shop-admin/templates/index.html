@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just1Shop Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="navbar">
+        <div class="container">
+            <h1 class="logo">🛍️ Just1Shop Admin</h1>
+            <nav class="nav-menu">
+                <a href="/">Dashboard</a>
+                <a href="/products">Products</a>
+                <a href="/categories">Categories</a>
+                <a href="/sub-categories">Sub-Categories</a>
+                <a href="/banners">Banners</a>
+                <a href="/offers">Offers</a>
+                <a href="/festival-offers">Festival Offers</a>
+                <a href="/addresses">Addresses</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="welcome">
+            <h1>Welcome to Just1Shop Admin Dashboard</h1>
+            <p>Manage your e-commerce platform from here. Select an option from the menu above.</p>
+        </section>
+
+        <section class="dashboard-grid">
+            <div class="dashboard-card">
+                <h3>📦 Products</h3>
+                <p>Manage product inventory and details</p>
+                <a href="/products" class="btn btn-primary">Manage Products</a>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>📂 Categories</h3>
+                <p>Organize products into categories</p>
+                <a href="/categories" class="btn btn-primary">Manage Categories</a>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>🏷️ Sub-Categories</h3>
+                <p>Create product sub-categories</p>
+                <a href="/sub-categories" class="btn btn-primary">Manage Sub-Categories</a>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>🎨 Banners</h3>
+                <p>Create promotional banners</p>
+                <a href="/banners" class="btn btn-primary">Manage Banners</a>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>💰 Offers</h3>
+                <p>Set up product discounts</p>
+                <a href="/offers" class="btn btn-primary">Manage Offers</a>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>🎉 Festival Offers</h3>
+                <p>Create festival-specific offers</p>
+                <a href="/festival-offers" class="btn btn-primary">Manage Festival Offers</a>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>📍 Addresses</h3>
+                <p>Manage delivery addresses</p>
+                <a href="/addresses" class="btn btn-primary">Manage Addresses</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Just1Shop. All rights reserved.</p>
+    </footer>
+</body>
+</html>

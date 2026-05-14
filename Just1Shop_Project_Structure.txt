@@ -1,0 +1,86 @@
+just1shop/
+├── lib/
+│   ├── core/
+│   │   ├── constants/
+│   │   │   ├── app_constants.dart
+│   │   │   ├── firebase_constants.dart
+│   │   │   └── route_constants.dart
+│   │   ├── services/
+│   │   │   ├── firebase_service.dart
+│   │   │   ├── auth_service.dart
+│   │   │   ├── razorpay_service.dart
+│   │   │   └── notification_service.dart
+│   │   ├── utils/
+│   │   │   ├── validators.dart
+│   │   │   ├── helpers.dart
+│   │   │   └── extensions.dart
+│   │   └── widgets/
+│   │       ├── custom_button.dart
+│   │       ├── custom_text_field.dart
+│   │       ├── loading_widget.dart
+│   │       └── error_widget.dart
+│   ├── data/
+│   │   ├── models/
+│   │   │   ├── user_model.dart
+│   │   │   ├── product_model.dart
+│   │   │   ├── category_model.dart
+│   │   │   ├── order_model.dart
+│   │   │   ├── cart_model.dart
+│   │   │   ├── banner_model.dart
+│   │   │   └── coupon_model.dart
+│   │   └── repositories/
+│   │       ├── auth_repository.dart
+│   │       ├── product_repository.dart
+│   │       ├── order_repository.dart
+│   │       └── payment_repository.dart
+│   ├── presentation/
+│   │   ├── customer/
+│   │   │   ├── screens/
+│   │   │   │   ├── splash_screen.dart
+│   │   │   │   ├── auth_screen.dart
+│   │   │   │   ├── home_screen.dart
+│   │   │   │   ├── category_screen.dart
+│   │   │   │   ├── product_detail_screen.dart
+│   │   │   │   ├── cart_screen.dart
+│   │   │   │   ├── checkout_screen.dart
+│   │   │   │   ├── address_screen.dart
+│   │   │   │   ├── order_confirmation_screen.dart
+│   │   │   │   ├── order_history_screen.dart
+│   │   │   │   └── profile_screen.dart
+│   │   │   └── widgets/
+│   │   │       ├── product_card.dart
+│   │   │       ├── category_card.dart
+│   │   │       ├── banner_carousel.dart
+│   │   │       └── order_card.dart
+│   │   ├── owner/
+│   │   │   ├── screens/
+│   │   │   │   ├── owner_login_screen.dart
+│   │   │   │   ├── owner_dashboard_screen.dart
+│   │   │   │   ├── product_management_screen.dart
+│   │   │   │   ├── order_management_screen.dart
+│   │   │   │   ├── banner_management_screen.dart
+│   │   │   │   └── sales_summary_screen.dart
+│   │   │   └── widgets/
+│   │   │       ├── order_card_owner.dart
+│   │   │       └── product_form_widget.dart
+│   │   ├── delivery/
+│   │   │   ├── screens/
+│   │   │   │   ├── delivery_login_screen.dart
+│   │   │   │   ├── delivery_dashboard_screen.dart
+│   │   │   │   └── delivery_order_detail_screen.dart
+│   │   │   └── widgets/
+│   │   │       └── delivery_order_card.dart
+│   │   └── blocs/
+│   │       ├── auth/
+│   │       ├── product/
+│   │       ├── cart/
+│   │       ├── order/
+│   │       └── payment/
+│   ├── routes/
+│   │   └── app_routes.dart
+│   └── main.dart
+├── android/
+├── assets/
+│   ├── images/
+│   └── icons/
+└── pubspec.yaml

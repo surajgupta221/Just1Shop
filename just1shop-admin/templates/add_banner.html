@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Add Banner - Admin{% endblock %}
+{% block content %}
+<h2>Add Banner</h2>
+<form method="post">
+  <label>Image URL: <input name="imageUrl"></label><br>
+  <label>Related Products (comma separated or JSON array):</label><br>
+  <textarea name="relatedProducts" rows="3" style="width:100%" placeholder="e.g. 123, 456 or [\"123\", \"456\"]"></textarea>
+  <br>
+  <button type="submit">Add</button>
+</form>
+{% endblock %}

@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "69791413402",
+    "project_id": "just1shop",
+    "storage_bucket": "just1shop.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:69791413402:android:53965c25243812efa41b23",
+        "android_client_info": {
+          "package_name": "com.just1shop.just1shop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "69791413402-sniks587b67aj7mm30aqng25benknufu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDj7FOklzK3o1RBRLIb_f1KYYVbGvplIqo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "69791413402-sniks587b67aj7mm30aqng25benknufu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "69791413402-due4k4jvqp3mv0she62tq3mi2ejn9e63.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tensoftware.just1shop"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:69791413402:android:5bbc80dc9268e8dda41b23",
+        "android_client_info": {
+          "package_name": "com.tensoftware.just1shop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "69791413402-0b3julb5itnbdn2o8lvld07bccpi27t2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tensoftware.just1shop",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "69791413402-sniks587b67aj7mm30aqng25benknufu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDj7FOklzK3o1RBRLIb_f1KYYVbGvplIqo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "69791413402-sniks587b67aj7mm30aqng25benknufu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "69791413402-due4k4jvqp3mv0she62tq3mi2ejn9e63.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tensoftware.just1shop"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

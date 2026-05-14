@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Add Product - Admin{% endblock %}
+{% block content %}
+<h2>{% if product %}Edit Product{% else %}Add Product{% endif %}</h2>
+<form method="post" enctype="multipart/form-data" id="product-form">
+  <input type="hidden" name="id" value="{{ product.id if product }}">
+  <div class="form-group">
+    <label>Product Name: <input name="productname" value="{{ product.productname if product }}"></label>
+  </div>
+  <div class="form-group">
+    <label>Category: <input name="category" value="{{ product.category if product }}"></label>
+  </div>
+  <div class="form-group">
+    <label>Sub-category: <input name="sub_category" value="{{ product.sub_category if product }}"></label>
+  </div>
+  <div class="form-group">
+    <label>SKU: <input name="sku" value="{{ product.sku if product }}"></label>
+  </div>
+  <div class="form-group">
+    <label>Stocks: <input name="stocks" type="number" value="{{ product.stocks if product }}"></label>
+  </div>
+  <div class="form-group">
+    <label>Min Price: <input name="min_price" type="number" value="{{ product.min_price if product }}"></label>
+  </div>
+  <div class="form-group">
+    <label>Date: <input name="date" type="text" value="{{ product.date if product }}"></label>
+  </div>
+  <div class="form-group full-width">
+    <label>Description:<br>
+      <textarea name="description">{{ product.description if product }}</textarea>
+    </label>
+  </div>
+  <div class="form-group">
+    <label>Featured: <input name="featured" type="checkbox" {% if product and product.featured %}checked{% endif %}></label>
+  </div>
+  <div class="form-group">
+    <label>Image: <input type="file" name="image" id="image-input"></label>
+  </div>
+  {% if product and product.imageUrl %}
+    <div class="form-group">
+      <label>Current image:</label><br>
+      {% set img_src = product.imageUrl[0] if (product.imageUrl is sequence and not product.imageUrl is string) else product.imageUrl %}
+      {% if img_src.startswith('http') %}
+        <img id="current-image" src="{{ img_src }}" alt="image" style="max-width:200px; display:block; margin:8px 0;">
+      {% else %}
+        <img id="current-image" src="{{ request.url_root.rstrip('/') + img_src }}" alt="image" style="max-width:200px; display:block; margin:8px 0;">
+      {% endif %}
+    </div>
+  {% endif %}
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Save</button>
+    <a class="btn btn-secondary" href="/products">Cancel</a>
+  </div>
+</form>
+
+<script>
+document.getElementById('image-input').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    let img = document.getElementById('current-image');
+    if (!img){
+      img = document.createElement('img');
+      img.style.maxWidth = '200px';
+      img.style.display = 'block';
+      img.style.margin = '8px 0';
+      e.target.parentNode.appendChild(img);
+    }
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+</script>
+{% endblock %}

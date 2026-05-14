@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Categories - Admin{% endblock %}
+{% block content %}
+<h2>Categories</h2>
+<div style="margin:10px 0 20px 0">
+	<a class="btn btn-primary" href="/add-category">Add Category</a>
+</div>
+<div style="margin:8px 0">
+  <label for="searchCategories">Search:</label>
+  <input id="searchCategories" type="search" placeholder="Search categories..." oninput="filterCategories()" />
+</div>
+{% if categories and categories|length > 0 %}
+	<div class="table-section">
+		<table id="categoriesTable" class="data-table">
+			<thead>
+				<tr>
+					{% set headers = categories[0].keys()|list %}
+					{% for h in headers %}
+						<th>{% if h in ['imgUrl','imageUrl'] %}Image{% else %}{{ h }}{% endif %}</th>
+					{% endfor %}
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for item in categories %}
+					<tr data-name="{{ item.get('category') or item.get('name') or item.get('title') or item.get('id') }}">
+						{% for h in headers %}
+							{% set val = item.get(h) %}
+							<td>
+								{% if (h == 'imgUrl' or h == 'imageUrl') and val %}
+									{% set img_raw = val %}
+									{% set img_src = img_raw[0] if (img_raw is sequence and not img_raw is string) else img_raw %}
+									{% if img_src and img_src.startswith('http') %}
+										<img class="lazy-img" data-src="{{ img_src }}" src="/static/placeholder.png" loading="lazy" style="max-width:120px;" />
+									{% else %}
+										<img class="lazy-img" data-src="{{ BACKEND_URL }}{{ img_src }}" src="/static/placeholder.png" loading="lazy" style="max-width:120px;" />
+									{% endif %}
+								{% elif val is mapping or val is sequence and not val is string %}
+									<pre>{{ val|tojson(indent=2) }}</pre>
+								{% else %}
+									{{ val }}
+								{% endif %}
+							</td>
+						{% endfor %}
+						<td>
+							<button class="btn btn-sm btn-danger" onclick="confirmDelete('{{ item.id }}', this, 'category')">Delete</button>
+							<a class="btn btn-sm btn-secondary" href="/add-category?id={{ item.id }}">Edit</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% else %}
+	<div class="empty-state">
+		<p>No categories found.</p>
+		<a href="/add-category" class="btn btn-primary">Add Category</a>
+	</div>
+{% endif %}
+{% endblock %}

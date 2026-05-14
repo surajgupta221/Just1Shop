@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Add Sub-category - Admin{% endblock %}
+{% block content %}
+<h2>Add Sub-category</h2>
+<form method="post">
+  <label>Sub Category: <input name="sub_category"></label><br>
+  <label>Category: <input name="category"></label><br>
+  <label>Image URL: <input name="imageUrl"></label><br>
+  <label>Index: <input name="sub_index" type="number" value="1"></label><br>
+  <button type="submit">Add</button>
+</form>
+{% endblock %}

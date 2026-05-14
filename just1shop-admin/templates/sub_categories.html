@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Sub-categories - Admin{% endblock %}
+{% block content %}
+<h2>Sub-categories</h2>
+<div style="margin:10px 0 20px 0">
+	<a class="btn btn-primary" href="/add-sub-category">Add Sub-category</a>
+</div>
+
+<div style="margin:8px 0">
+	<label for="parentFilter">Filter by parent:</label>
+	<select id="parentFilter" onchange="filterSubCategories()">
+		<option value="">All</option>
+		{% for cid, name in categories_map.items() %}
+			<option value="{{ cid }}">{{ name }}</option>
+		{% endfor %}
+	</select>
+	&nbsp;&nbsp;
+	<label for="searchFilter">Search:</label>
+	<input id="searchFilter" type="search" placeholder="Search name..." oninput="filterSubCategories()" />
+</div>
+{% if sub_categories and sub_categories|length > 0 %}
+	<div class="table-section">
+		<table id="subCategoriesTable" class="data-table">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Name</th>
+					<th>Parent Category</th>
+					<th>Index</th>
+					<th>Image</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for item in sub_categories %}
+					{% set raw_parent = item.get('category') %}
+					{% set display_parent = (raw_parent if raw_parent is mapping else categories_map.get(raw_parent, raw_parent)) %}
+					<tr data-parent="{{ raw_parent }}" data-name="{{ (item.get('sub_category') or item.get('name') or item.get('title'))|default('') }}">
+						<td>{{ item.get('id') }}</td>
+						<td>{{ item.get('sub_category') or item.get('name') or item.get('title') }}</td>
+						<td>{{ display_parent }}</td>
+						<td>{{ item.get('sub_index') }}</td>
+						<td>
+							{% set raw_img = item.get('imgUrl') or item.get('imageUrl') %}
+							{% if raw_img %}
+								{% set img_src = raw_img[0] if (raw_img is sequence and not raw_img is string) else raw_img %}
+								{% if img_src and img_src.startswith('http') %}
+									<img class="lazy-img" data-src="{{ img_src }}" src="/static/placeholder.png" alt="thumb" style="max-width:120px;" loading="lazy" />
+								{% else %}
+									<img class="lazy-img" data-src="{{ BACKEND_URL }}{{ img_src }}" src="/static/placeholder.png" alt="thumb" style="max-width:120px;" loading="lazy" />
+								{% endif %}
+							{% else %}
+																{% for k,v in item.items() %}
+																	{% if k not in ['id','sub_category','name','title','category','sub_index','imgUrl','imageUrl'] %}
+																		<div><strong>{{ k }}:</strong> {{ v }}</div>
+																	{% endif %}
+																{% endfor %}
+							{% endif %}
+						</td>
+						<td>
+							<button class="btn btn-sm btn-danger" onclick="confirmDelete('{{ item.id }}', this, 'sub-category')">Delete</button>
+							<a class="btn btn-sm btn-secondary" href="/add-sub-category?id={{ item.id }}">Edit</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% else %}
+	<div class="empty-state">
+		<p>No sub-categories found.</p>
+		<a href="/add-sub-category" class="btn btn-primary">Add Sub-category</a>
+	</div>
+{% endif %}
+{% endblock %}

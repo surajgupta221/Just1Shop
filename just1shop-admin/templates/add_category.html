@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Add Category - Admin{% endblock %}
+{% block content %}
+<h2>{% if category %}Edit Category{% else %}Add Category{% endif %}</h2>
+<form method="post" enctype="multipart/form-data">
+  <input type="hidden" name="id" value="{{ category.id if category }}">
+  <div class="form-group">
+    <label>Category: <input name="category" value="{{ category.category if category }}"></label>
+  </div>
+  <div class="form-group">
+    <label>Image: <input type="file" name="image" id="cat-image-input"></label>
+    <input type="hidden" name="imgUrl" id="existing-img" value="{% if category and category.imgUrl %}{{ category.imgUrl[0] if (category.imgUrl is sequence and not category.imgUrl is string) else category.imgUrl }}{% endif %}">
+  </div>
+  {% if category and category.imgUrl %}
+    <div class="form-group">
+      <label>Current image:</label><br>
+      {% set img_src = category.imgUrl[0] if (category.imgUrl is sequence and not category.imgUrl is string) else category.imgUrl %}
+      {% if img_src.startswith('http') %}
+        <img id="cat-current-image" src="{{ img_src }}" style="max-width:200px; display:block; margin:8px 0;">
+      {% else %}
+        <img id="cat-current-image" src="{{ request.url_root.rstrip('/') + img_src }}" style="max-width:200px; display:block; margin:8px 0;">
+      {% endif %}
+    </div>
+  {% endif %}
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Save</button>
+    <a class="btn btn-secondary" href="/categories">Cancel</a>
+  </div>
+</form>
+
+<script>
+document.getElementById('cat-image-input').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    let img = document.getElementById('cat-current-image');
+    if (!img){
+      img = document.createElement('img');
+      img.style.maxWidth = '200px';
+      img.style.display = 'block';
+      img.style.margin = '8px 0';
+      e.target.parentNode.appendChild(img);
+    }
+    img.src = ev.target.result;
+    // clear existing hidden img value to indicate new upload
+    const hid = document.getElementById('existing-img');
+    if (hid) hid.value = '';
+  };
+  reader.readAsDataURL(file);
+});
+</script>
+{% endblock %}

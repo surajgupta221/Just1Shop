@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Banners - Admin{% endblock %}
+{% block content %}
+<h2>Banners</h2>
+<div style="margin:10px 0 20px 0">
+	<a class="btn btn-primary" href="/add-banner">Add Banner</a>
+</div>
+{% if error %}
+    <div class="alert alert-danger">Error fetching banners: {{ error }}</div>
+{% endif %}
+{% if banners and banners|length > 0 %}
+	<div class="table-section">
+		<table id="bannersTable" class="data-table">
+			<thead>
+				<tr>
+					{% set headers = banners[0].keys()|list %}
+					{% for h in headers %}
+						<th>{% if h in ['imgUrl','imageUrl'] %}Image{% else %}{{ h }}{% endif %}</th>
+					{% endfor %}
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for item in banners %}
+					<tr data-name="{{ item.get('heading') or item.get('title') or item.get('id') }}">
+						{% for h in headers %}
+							{% set val = item.get(h) %}
+							<td>
+								{% if (h == 'imgUrl' or h == 'imageUrl') and val %}
+									{% set img_raw = val %}
+									{% set img_src = img_raw[0] if (img_raw is sequence and not img_raw is string) else img_raw %}
+									{% if img_src and img_src.startswith('http') %}
+										<img class="lazy-img" data-src="{{ img_src }}" src="/static/placeholder.png" loading="lazy" style="max-width:120px;" />
+									{% else %}
+										<img class="lazy-img" data-src="{{ BACKEND_URL }}{{ img_src }}" src="/static/placeholder.png" loading="lazy" style="max-width:120px;" />
+									{% endif %}
+								{% elif val is mapping %}
+									<pre>{{ val|tojson(indent=2) }}</pre>
+								{% elif val is sequence and not val is string %}
+									{{ val|join(', ') }}
+								{% else %}
+									{{ val }}
+								{% endif %}
+							</td>
+						{% endfor %}
+						<td>
+							<button class="btn btn-sm btn-danger" onclick="confirmDelete('{{ item.id }}', this, 'banner')">Delete</button>
+							<a class="btn btn-sm btn-secondary" href="/add-banner?id={{ item.id }}">Edit</a>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% else %}
+	<div class="empty-state">
+		<p>No banners found.</p>
+		<a href="/add-banner" class="btn btn-primary">Add Banner</a>
+	</div>
+{% endif %}
+{% endblock %}
