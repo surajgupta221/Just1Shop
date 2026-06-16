@@ -1,8 +1,9 @@
 import 'package:equatable/equatable.dart';
+
 import 'product_model.dart';
 
 class CartItem extends Equatable {
-  final Product product;
+  final ProductModel product;
   final int quantity;
 
   const CartItem({
@@ -13,7 +14,7 @@ class CartItem extends Equatable {
   double get totalPrice => product.price * quantity;
 
   CartItem copyWith({
-    Product? product,
+    ProductModel? product,
     int? quantity,
   }) {
     return CartItem(

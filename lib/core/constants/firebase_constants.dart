@@ -11,6 +11,7 @@ class FirebaseConstants {
   static const String addresses = 'addresses';
   static const String offers = 'offers';
   static const String festivalOffers = 'festival_offers';
+  static const String deliveryZones = 'delivery_zones';
 
   // Storage Buckets
   static const String productImages = 'product_images';

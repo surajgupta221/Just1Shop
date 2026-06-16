@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import json
 from datetime import datetime
 import base64
+import csv
+import io
 
 # Load environment variables
 load_dotenv()
@@ -15,14 +17,17 @@ app = Flask(__name__)
 BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
 
 # Helper function to make API requests
-def api_request(method, endpoint, data=None):
+def api_request(method, endpoint, data=None, files=None):
     """Make HTTP request to backend API"""
     url = f"{BACKEND_URL}{endpoint}"
     try:
         if method == "GET":
             response = requests.get(url, timeout=5)
         elif method == "POST":
-            response = requests.post(url, json=data, timeout=5)
+            if files:
+                response = requests.post(url, data=data, files=files, timeout=15)
+            else:
+                response = requests.post(url, json=data, timeout=10)
         elif method == "DELETE":
             response = requests.delete(url, timeout=5)
 
@@ -101,6 +106,148 @@ def add_product():
 def delete_product(product_id):
     """Delete product"""
     result = api_request("DELETE", f"/delete-product/{product_id}")
+    return jsonify(result)
+
+
+@app.route("/ai-products", methods=["GET", "POST"])
+def ai_products():
+    """AI assisted product creation by manual text, bill text, photo, and CSV."""
+    draft = None
+    drafted_products = []
+    message = None
+    error = None
+
+    if request.method == "POST":
+        action = request.form.get("action")
+        try:
+            if action == "manual_draft":
+                result = api_request(
+                    "POST",
+                    "/ai/product-draft",
+                    {"text": request.form.get("manual_text", "")},
+                )
+                draft = result if "error" not in result else None
+                error = result.get("error") if isinstance(result, dict) else None
+            elif action == "save_manual":
+                product_data = request.form.to_dict()
+                product_data.pop("action", None)
+                result = api_request("POST", "/bulk-products", {"products": [product_data]})
+                message = result.get("message", "Product saved")
+            elif action == "bill_draft":
+                result = api_request(
+                    "POST",
+                    "/ai/product-from-bill",
+                    {"text": request.form.get("bill_text", "")},
+                )
+                drafted_products = result.get("products", []) if isinstance(result, dict) else []
+                message = f"AI found {len(drafted_products)} product drafts from bill text."
+            elif action == "save_bill":
+                products_raw = request.form.get("products_json", "[]")
+                products = json.loads(products_raw)
+                result = api_request("POST", "/bulk-products", {"products": products})
+                message = result.get("message", "Bulk products saved")
+            elif action == "photo_draft":
+                image = request.files.get("image")
+                if not image or not image.filename:
+                    error = "Please upload a product photo."
+                else:
+                    files = {
+                        "image": (image.filename, image.stream, image.mimetype)
+                    }
+                    result = api_request(
+                        "POST",
+                        "/ai/product-from-photo",
+                        data={"notes": request.form.get("photo_notes", "")},
+                        files=files,
+                    )
+                    draft = result if "error" not in result else None
+                    error = result.get("error") if isinstance(result, dict) else None
+            elif action == "csv_upload":
+                file = request.files.get("csv_file")
+                if not file or not file.filename:
+                    error = "Please upload a CSV file."
+                else:
+                    files = {"file": (file.filename, file.stream, file.mimetype)}
+                    result = api_request("POST", "/bulk-products/csv", files=files)
+                    message = f"{result.get('count', 0)} products imported from CSV."
+        except Exception as exc:
+            error = str(exc)
+
+    return render_template(
+        "ai_products.html",
+        draft=draft,
+        drafted_products=drafted_products,
+        message=message,
+        error=error,
+    )
+
+
+@app.route("/sample-products.csv")
+def sample_products_csv():
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(
+        [
+            "id",
+            "name",
+            "description",
+            "price",
+            "discountPrice",
+            "unit",
+            "stock",
+            "categoryId",
+            "tags",
+        ]
+    )
+    writer.writerow(
+        [
+            "amul-malai-paneer-200g",
+            "Amul Malai Paneer - 200g",
+            "Fresh dairy paneer for dinner",
+            "95",
+            "92",
+            "200 g",
+            "30",
+            "milk-dairy",
+            "fresh,dairy,paneer",
+        ]
+    )
+    return app.response_class(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=sample-products.csv"},
+    )
+
+
+@app.route("/delivery-zones", methods=["GET", "POST"])
+def delivery_zones():
+    """Manage serviceable delivery PIN codes."""
+    message = None
+    error = None
+    if request.method == "POST":
+        zone_data = request.form.to_dict()
+        zone_data["isActive"] = request.form.get("isActive") == "on"
+        result = api_request("POST", "/delivery-zones", zone_data)
+        if isinstance(result, dict) and result.get("error"):
+            error = result.get("error")
+        else:
+            message = result.get("message", "Delivery PIN code saved")
+
+    zones = api_request("GET", "/delivery-zones")
+    if isinstance(zones, dict) and zones.get("error"):
+        error = zones.get("error")
+        zones = []
+    return render_template(
+        "delivery_zones.html",
+        zones=zones,
+        message=message,
+        error=error,
+    )
+
+
+@app.route("/delete-delivery-zone/<pincode>", methods=["DELETE"])
+def delete_delivery_zone(pincode):
+    result = api_request("DELETE", f"/delivery-zones/{pincode}")
     return jsonify(result)
 
 

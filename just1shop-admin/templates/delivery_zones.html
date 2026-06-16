@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}Delivery PIN Codes - Admin{% endblock %}
+{% block content %}
+<h2>Delivery PIN Codes</h2>
+<p>Activate only the target locations where Just1Shop should deliver. Add more PIN codes as operations expand.</p>
+
+<form method="post" class="admin-form">
+  <div>
+    <label>PIN Code *</label>
+    <input name="pincode" required maxlength="6" placeholder="834002">
+  </div>
+  <div>
+    <label>City</label>
+    <input name="city" placeholder="Ranchi">
+  </div>
+  <div>
+    <label>State</label>
+    <input name="state" placeholder="Jharkhand">
+  </div>
+  <div>
+    <label>Areas served</label>
+    <input name="areas" placeholder="Doranda, Hinoo, Shyamali Colony">
+  </div>
+  <div>
+    <label>Delivery fee</label>
+    <input name="deliveryFee" type="number" step="1" value="0">
+  </div>
+  <div>
+    <label>Minimum order</label>
+    <input name="minimumOrder" type="number" step="1" value="199">
+  </div>
+  <div>
+    <label>Estimated minutes</label>
+    <input name="estimatedMinutes" type="number" step="1" value="60">
+  </div>
+  <div>
+    <label>Store ID</label>
+    <input name="storeId" placeholder="am-hinoo-chowk-rnc">
+  </div>
+  <label>
+    <input name="isActive" type="checkbox" checked>
+    Active for delivery
+  </label>
+  <button class="btn btn-primary" type="submit">Save PIN Code</button>
+</form>
+
+<h3>Active Delivery Targets</h3>
+{% if zones and zones|length > 0 %}
+  <div class="table-section">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>PIN Code</th>
+          <th>City</th>
+          <th>Areas</th>
+          <th>Fee</th>
+          <th>Min Order</th>
+          <th>ETA</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for zone in zones %}
+          <tr>
+            <td>{{ zone.pincode }}</td>
+            <td>{{ zone.city }}</td>
+            <td>{{ zone.areas|join(', ') if zone.areas else '' }}</td>
+            <td>₹{{ zone.deliveryFee }}</td>
+            <td>₹{{ zone.minimumOrder }}</td>
+            <td>{{ zone.estimatedMinutes }} min</td>
+            <td>{{ 'Active' if zone.isActive else 'Paused' }}</td>
+            <td>
+              <button class="btn btn-sm btn-danger" onclick="deleteDeliveryZone('{{ zone.pincode }}')">Delete</button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="empty-state">No delivery PIN codes added yet.</div>
+{% endif %}
+
+<script>
+function deleteDeliveryZone(pincode) {
+  if (!confirm('Delete delivery PIN code ' + pincode + '?')) return;
+  fetch('/delete-delivery-zone/' + pincode, { method: 'DELETE' })
+    .then(() => window.location.reload());
+}
+</script>
+{% endblock %}

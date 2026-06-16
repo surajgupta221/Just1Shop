@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}AI Product Import - Admin{% endblock %}
+{% block content %}
+<h2>AI Product Import</h2>
+<p>Add products manually, from a product photo, from a bill/invoice text, or from bulk CSV. The Python AI helper creates normalized Firestore-ready product data.</p>
+
+<section class="table-section">
+  <h3>Manual AI Draft</h3>
+  <form method="post">
+    <input type="hidden" name="action" value="manual_draft">
+    <textarea name="manual_text" rows="4" placeholder="Example: Amul Malai Paneer 200g Rs 95 fresh dairy dinner protein"></textarea>
+    <button class="btn btn-primary" type="submit">Generate Draft</button>
+  </form>
+</section>
+
+<section class="table-section">
+  <h3>Product Photo Draft</h3>
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="action" value="photo_draft">
+    <input type="file" name="image" accept="image/*">
+    <input name="photo_notes" placeholder="Optional notes: brand, unit, MRP, category">
+    <button class="btn btn-primary" type="submit">Generate From Photo</button>
+  </form>
+</section>
+
+<section class="table-section">
+  <h3>Bill / Invoice Text</h3>
+  <form method="post">
+    <input type="hidden" name="action" value="bill_draft">
+    <textarea name="bill_text" rows="8" placeholder="Paste bill lines: product name, unit, price"></textarea>
+    <button class="btn btn-primary" type="submit">Extract Products</button>
+  </form>
+</section>
+
+<section class="table-section">
+  <h3>Bulk CSV Upload</h3>
+  <p>CSV columns can include: id, name, description, price, discountPrice, unit, stock, categoryId, tags.</p>
+  <p><a href="/sample-products.csv">Download sample CSV</a></p>
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="action" value="csv_upload">
+    <input type="file" name="csv_file" accept=".csv">
+    <button class="btn btn-primary" type="submit">Import CSV</button>
+  </form>
+</section>
+
+{% if draft %}
+  <section class="table-section">
+    <h3>AI Draft Product</h3>
+    <form method="post">
+      <input type="hidden" name="action" value="save_manual">
+      <label>ID</label>
+      <input name="id" value="{{ draft.id }}">
+      <label>Name</label>
+      <input name="name" value="{{ draft.name }}">
+      <label>Description</label>
+      <textarea name="description" rows="3">{{ draft.description }}</textarea>
+      <label>MRP</label>
+      <input name="price" type="number" step="0.01" value="{{ draft.price }}">
+      <label>Selling Price</label>
+      <input name="discountPrice" type="number" step="0.01" value="{{ draft.discountPrice }}">
+      <label>Unit</label>
+      <input name="unit" value="{{ draft.unit }}">
+      <label>Stock</label>
+      <input name="stock" type="number" value="{{ draft.stock }}">
+      <label>Category ID</label>
+      <input name="categoryId" value="{{ draft.categoryId }}">
+      <label>Image URL</label>
+      <input name="images" value="{{ draft.images[0] if draft.images else '' }}">
+      <button class="btn btn-primary" type="submit">Save Product</button>
+    </form>
+    <pre>{{ draft|tojson(indent=2) }}</pre>
+  </section>
+{% endif %}
+
+{% if drafted_products and drafted_products|length > 0 %}
+  <section class="table-section">
+    <h3>Bill Products Found</h3>
+    <form method="post">
+      <input type="hidden" name="action" value="save_bill">
+      <input type="hidden" name="products_json" value='{{ drafted_products|tojson }}'>
+      <button class="btn btn-primary" type="submit">Save All Extracted Products</button>
+    </form>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Unit</th>
+          <th>Price</th>
+          <th>Category</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in drafted_products %}
+          <tr>
+            <td>{{ product.name }}</td>
+            <td>{{ product.unit }}</td>
+            <td>₹{{ product.price }}</td>
+            <td>{{ product.categoryId }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endif %}
+{% endblock %}

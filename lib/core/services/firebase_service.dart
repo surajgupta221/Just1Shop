@@ -9,18 +9,26 @@ class FirebaseService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FirebaseStorage _storage = FirebaseStorage.instance;
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
-  
+
   // Getters
   static FirebaseFirestore get firestore => _firestore;
   static FirebaseAuth get auth => _auth;
   static FirebaseStorage get storage => _storage;
   static FirebaseMessaging get messaging => _messaging;
-  
+
   // Collections
-  static CollectionReference get usersCollection => _firestore.collection('users');
-  static CollectionReference get productsCollection => _firestore.collection('products');
-  static CollectionReference get categoriesCollection => _firestore.collection('categories');
-  static CollectionReference get ordersCollection => _firestore.collection('orders');
-  static CollectionReference get bannersCollection => _firestore.collection('banners');
-  static CollectionReference get couponsCollection => _firestore.collection('coupons');
+  static CollectionReference get usersCollection =>
+      _firestore.collection('users');
+  static CollectionReference get productsCollection =>
+      _firestore.collection('products');
+  static CollectionReference get categoriesCollection =>
+      _firestore.collection('categories');
+  static CollectionReference get ordersCollection =>
+      _firestore.collection('orders');
+  static CollectionReference get bannersCollection =>
+      _firestore.collection('banners');
+  static CollectionReference get couponsCollection =>
+      _firestore.collection('coupons');
+  static CollectionReference get deliveryZonesCollection =>
+      _firestore.collection('delivery_zones');
 }

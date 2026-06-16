@@ -1,7 +1,15 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from datetime import datetime
 from import_product import parse_iso_timestamp
 import import_product
+from ai_catalog_tools import (
+    delivery_zone_payload,
+    normalize_product,
+    product_from_text,
+    product_from_upload,
+    products_from_bill_text,
+    products_from_csv_bytes,
+)
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
@@ -619,3 +627,118 @@ def add_address(address: dict):
 def delete_address(address_id: str):
     db.collection("address").document(address_id).delete()
     return {"message": "Address deleted successfully"}
+
+
+# ----------------------------
+# DELIVERY SERVICE PIN CODES
+# ----------------------------
+@app.get("/delivery-zones")
+def get_delivery_zones():
+    docs = db.collection("delivery_zones").stream()
+    zones = []
+    for doc in docs:
+        data = doc.to_dict()
+        data["id"] = doc.id
+        zones.append(data)
+    zones.sort(key=lambda item: item.get("pincode", ""))
+    return zones
+
+
+@app.get("/delivery-zones/{pincode}")
+def get_delivery_zone(pincode: str):
+    doc = db.collection("delivery_zones").document(pincode).get()
+    if not doc.exists:
+        raise HTTPException(status_code=404, detail="PIN code is not active")
+    data = doc.to_dict()
+    data["id"] = doc.id
+    return data
+
+
+@app.post("/delivery-zones")
+def add_delivery_zone(zone: dict):
+    try:
+        payload = delivery_zone_payload(zone)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    db.collection("delivery_zones").document(payload["id"]).set(payload)
+    return {"message": "Delivery PIN code saved", "id": payload["id"]}
+
+
+@app.delete("/delivery-zones/{pincode}")
+def delete_delivery_zone(pincode: str):
+    db.collection("delivery_zones").document(pincode).delete()
+    return {"message": "Delivery PIN code deleted", "id": pincode}
+
+
+@app.get("/delivery/check/{pincode}")
+def check_delivery_pincode(pincode: str):
+    doc = db.collection("delivery_zones").document(pincode).get()
+    if not doc.exists:
+        return {
+            "pincode": pincode,
+            "serviceable": False,
+            "message": "Delivery is not active in this PIN code yet.",
+        }
+    zone = doc.to_dict()
+    return {
+        "pincode": pincode,
+        "serviceable": bool(zone.get("isActive", True)),
+        "zone": zone,
+        "message": "Delivery is active in this PIN code.",
+    }
+
+
+# ----------------------------
+# AI PRODUCT CREATION
+# ----------------------------
+@app.post("/ai/product-draft")
+def ai_product_draft(payload: dict):
+    text = payload.get("text") or payload.get("prompt") or ""
+    if not text:
+        raise HTTPException(status_code=400, detail="text is required")
+    return product_from_text(text, source="manual")
+
+
+@app.post("/ai/product-from-bill")
+def ai_product_from_bill(payload: dict):
+    text = payload.get("text") or payload.get("billText") or ""
+    if not text:
+        raise HTTPException(status_code=400, detail="bill text is required")
+    products = products_from_bill_text(text)
+    return {"count": len(products), "products": products}
+
+
+@app.post("/ai/product-from-photo")
+async def ai_product_from_photo(
+    image: UploadFile = File(...),
+    notes: str = Form(default=""),
+):
+    data = await image.read()
+    return product_from_upload(image.filename or "product-photo", data, notes)
+
+
+@app.post("/bulk-products")
+def add_bulk_products(payload: dict):
+    products = payload.get("products")
+    if not isinstance(products, list):
+        raise HTTPException(status_code=400, detail="products array is required")
+
+    saved = []
+    for item in products:
+        product = normalize_product(item)
+        doc_id = product.pop("id")
+        db.collection("products").document(doc_id).set(product)
+        saved.append(doc_id)
+    return {"message": "Bulk products saved", "count": len(saved), "ids": saved}
+
+
+@app.post("/bulk-products/csv")
+async def add_bulk_products_csv(file: UploadFile = File(...)):
+    data = await file.read()
+    products = products_from_csv_bytes(data)
+    saved = []
+    for product in products:
+        doc_id = product.pop("id")
+        db.collection("products").document(doc_id).set(product)
+        saved.append(doc_id)
+    return {"message": "CSV products saved", "count": len(saved), "ids": saved}

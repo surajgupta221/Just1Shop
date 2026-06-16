@@ -3,9 +3,11 @@ class AppConstants {
   // App Info
   static const String appName = 'Just1Shop';
   static const String appVersion = '1.0.0';
+  static const String productionDomain = 'https://www.just1shop.com';
 
   // API URLs
   static const String baseUrl = 'http://10.0.2.2:8000'; // For Android emulator
+  static const String webBaseUrl = productionDomain;
   // static const String baseUrl = 'http://localhost:8000'; // For iOS simulator
 
   // Firebase Collections
@@ -19,7 +21,9 @@ class AppConstants {
   // User Roles
   static const String roleCustomer = 'customer';
   static const String roleOwner = 'owner';
+  static const String roleAdmin = 'admin';
   static const String roleDelivery = 'delivery';
+  static const String ownerPhone = '8987767301';
 
   // Order Status
   static const String orderPlaced = 'placed';
@@ -47,5 +51,17 @@ class AppConstants {
   static const int accentColor = 0xFFFF9800;
 
   // Delivery Time
-  static const String deliveryTime = '10-30 mins';
+  static const String deliveryTime = 'Under 24 hours';
+
+  static String normalizeIndianMobile(String phone) {
+    var digits = phone.replaceAll(RegExp(r'\D'), '');
+    if (digits.length == 12 && digits.startsWith('91')) {
+      digits = digits.substring(2);
+    }
+    return digits;
+  }
+
+  static bool isOwnerPhone(String phone) {
+    return normalizeIndianMobile(phone) == ownerPhone;
+  }
 }
