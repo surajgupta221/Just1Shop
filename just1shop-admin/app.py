@@ -360,9 +360,44 @@ def banners():
 
 @app.route("/add-banner", methods=["GET", "POST"])
 def add_banner():
-    """Add new banner"""
+    """Add new banner or generate one from an AI-style prompt."""
+    draft = None
+    message = None
+    error = None
+
     if request.method == "POST":
+        action = request.form.get("action", "save_manual")
+
+        if action == "ai_draft":
+            result = api_request(
+                "POST",
+                "/ai/banner-draft",
+                {
+                    "prompt": request.form.get("prompt", ""),
+                    "placement": request.form.get("placement", "home"),
+                    "style": request.form.get("style", "slide"),
+                    "ctaText": request.form.get("ctaText", "Shop Now"),
+                    "link": request.form.get("link", ""),
+                    "sortOrder": request.form.get("sortOrder", "0"),
+                },
+            )
+            if isinstance(result, dict) and result.get("error"):
+                error = result.get("error")
+            elif isinstance(result, dict) and result.get("detail"):
+                error = result.get("detail")
+            else:
+                draft = result
+                message = "Banner draft generated. Review it, edit if needed, then save."
+            return render_template(
+                "add_banner.html",
+                draft=draft,
+                message=message,
+                error=error,
+            )
+
         banner_data = request.form.to_dict()
+        banner_data.pop("action", None)
+        banner_data.pop("prompt", None)
         # Parse relatedProducts as array
         raw_related = request.form.get("relatedProducts", "")
         # support either a JSON-like array or comma-separated string
@@ -403,15 +438,31 @@ def add_banner():
                             related_products.append(v)
 
         banner_data["relatedProducts"] = related_products
+        banner_data["isActive"] = request.form.get("isActive") == "on"
+        banner_data["sortOrder"] = int(request.form.get("sortOrder") or 0)
+
+        animation_raw = request.form.get("animation", "")
+        if animation_raw:
+            try:
+                banner_data["animation"] = json.loads(animation_raw)
+            except Exception:
+                banner_data["animation"] = {
+                    "enabled": request.form.get("animationEnabled") == "on",
+                    "style": request.form.get("style", "slide"),
+                }
         
         result = api_request("POST", "/add-banner", banner_data)
         
         if "error" not in result:
-            return render_template("add_banner.html", message="Banner added successfully!")
+            return render_template(
+                "add_banner.html",
+                message="Banner added successfully!",
+                draft=None,
+            )
         else:
             return render_template("add_banner.html", error=result.get("error"))
     
-    return render_template("add_banner.html")
+    return render_template("add_banner.html", draft=draft)
 
 
 @app.route("/delete-banner/<banner_id>", methods=["DELETE"])

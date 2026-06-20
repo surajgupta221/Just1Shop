@@ -3,6 +3,7 @@ from datetime import datetime
 from import_product import parse_iso_timestamp
 import import_product
 from ai_catalog_tools import (
+    banner_from_prompt,
     delivery_zone_payload,
     normalize_product,
     product_from_text,
@@ -311,13 +312,16 @@ def delete_sub_category(sub_category_id: str):
 # ----------------------------
 @app.get("/banner")
 def get_banners():
-    banners_ref = db.collection("banner")
-    docs = banners_ref.stream()
+    docs = list(db.collection("banner").stream()) + list(db.collection("banners").stream())
 
     banner_list = []
+    seen_ids = set()
     for doc in docs:
         data = doc.to_dict()
         data["id"] = doc.id
+        if data["id"] in seen_ids:
+            continue
+        seen_ids.add(data["id"])
 
         def _sanitize(v):
             if v is None:
@@ -350,8 +354,10 @@ def add_banner(banner: dict):
     doc_id = payload.pop("id", None)
 
     coll = db.collection("banner")
+    app_coll = db.collection("banners")
     if doc_id:
         coll.document(doc_id).set(payload)
+        app_coll.document(doc_id).set(payload)
         return {"message": "Banner added successfully", "id": doc_id}
     else:
         res = coll.add(payload)
@@ -367,7 +373,17 @@ def add_banner(banner: dict):
                 doc_ref = res
 
         doc_id_out = getattr(doc_ref, "id", None)
+        if doc_id_out:
+            app_coll.document(doc_id_out).set(payload)
         return {"message": "Banner added successfully", "id": doc_id_out}
+
+
+@app.post("/ai/banner-draft")
+def ai_banner_draft(prompt: dict):
+    try:
+        return banner_from_prompt(prompt)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 # ----------------------------
@@ -376,6 +392,7 @@ def add_banner(banner: dict):
 @app.delete("/delete-banner/{banner_id}")
 def delete_banner(banner_id: str):
     db.collection("banner").document(banner_id).delete()
+    db.collection("banners").document(banner_id).delete()
     return {"message": "Banner deleted successfully"}
 
 

@@ -2,6 +2,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/models/user_model.dart';
 
@@ -20,10 +21,18 @@ class SignInWithPhone extends AuthEvent {
   final String verificationId;
   final String smsCode;
 
-  const SignInWithPhone(this.phoneNumber, this.verificationId, this.smsCode);
+  const SignInWithPhone(
+    this.phoneNumber,
+    this.verificationId,
+    this.smsCode,
+  );
 
   @override
-  List<Object?> get props => [phoneNumber, verificationId, smsCode];
+  List<Object?> get props => [
+        phoneNumber,
+        verificationId,
+        smsCode,
+      ];
 }
 
 class VerifyPhoneNumber extends AuthEvent {
@@ -102,11 +111,12 @@ class PhoneVerificationLoading extends AuthState {}
 
 class PhoneVerificationSuccess extends AuthState {
   final String verificationId;
+  final String phoneNumber;
 
-  const PhoneVerificationSuccess(this.verificationId);
+  const PhoneVerificationSuccess(this.verificationId, this.phoneNumber);
 
   @override
-  List<Object?> get props => [verificationId];
+  List<Object?> get props => [verificationId, phoneNumber];
 }
 
 class PhoneVerificationError extends AuthState {
@@ -131,7 +141,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SignOut>(_onSignOut);
   }
 
-  void _onCheckAuthStatus(
+  Future<void> _onCheckAuthStatus(
       CheckAuthStatus event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
@@ -147,7 +157,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  void _onSignInWithPhone(
+  Future<void> _onSignInWithPhone(
       SignInWithPhone event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
@@ -157,9 +167,62 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         event.smsCode,
       );
 
-      if (userCredential != null) {
-        final userProfile =
-            await _authRepository.getUserProfile(userCredential.user!.uid);
+      if (userCredential != null && userCredential.user != null) {
+        final uid = userCredential.user!.uid;
+
+        final phoneWithoutCountryCode =
+            AppConstants.normalizeIndianMobile(event.phoneNumber);
+        final isConfiguredOwner = AppConstants.isOwnerPhone(event.phoneNumber);
+
+        // Check if user profile exists
+        var userProfile = await _authRepository.getUserProfile(uid);
+
+        // Fallback lookup for manually pre-created profiles keyed by phone.
+        final phoneProfile = userProfile ??
+            await _authRepository.getUserProfileByPhone(event.phoneNumber);
+
+        if (phoneProfile == null) {
+          userProfile = UserModel(
+            id: uid,
+            name: isConfiguredOwner ? 'Just1Shop Owner' : '',
+            phone: phoneWithoutCountryCode,
+            email: null,
+            role: isConfiguredOwner
+                ? AppConstants.roleOwner
+                : AppConstants.roleCustomer,
+            addresses: [],
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
+
+          await _authRepository.createUserProfile(userProfile);
+        } else {
+          userProfile = phoneProfile;
+          if (isConfiguredOwner && userProfile.role != AppConstants.roleOwner) {
+            userProfile = userProfile.copyWith(
+              id: uid,
+              name: userProfile.name.trim().isEmpty
+                  ? 'Just1Shop Owner'
+                  : userProfile.name,
+              phone: phoneWithoutCountryCode,
+              role: AppConstants.roleOwner,
+              updatedAt: DateTime.now(),
+            );
+            await _authRepository.createUserProfile(userProfile);
+            emit(AuthAuthenticated(userCredential.user!, userProfile));
+            return;
+          }
+
+          if (userProfile.id != uid) {
+            userProfile = userProfile.copyWith(
+              id: uid,
+              phone: phoneWithoutCountryCode,
+              updatedAt: DateTime.now(),
+            );
+            await _authRepository.createUserProfile(userProfile);
+          }
+        }
+
         emit(AuthAuthenticated(userCredential.user!, userProfile));
       } else {
         emit(const AuthError('Sign in failed'));
@@ -169,23 +232,72 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  void _onVerifyPhoneNumber(
+  Future<void> _onVerifyPhoneNumber(
       VerifyPhoneNumber event, Emitter<AuthState> emit) async {
     emit(PhoneVerificationLoading());
     try {
+      // Create wrapper callbacks that emit states
+      void onVerificationCompleted(PhoneAuthCredential credential) {
+        event.verificationCompleted(credential);
+      }
+
+      void onVerificationFailed(FirebaseAuthException e) {
+        emit(PhoneVerificationError(_friendlyFirebaseAuthMessage(e)));
+        event.verificationFailed(e);
+      }
+
+      void onCodeSent(String verificationId, int? resendToken) {
+        // Emit success state with verificationId and phoneNumber
+        emit(PhoneVerificationSuccess(verificationId, event.phoneNumber));
+        event.codeSent(verificationId, resendToken);
+      }
+
+      void onCodeAutoRetrievalTimeout(String verificationId) {
+        event.codeAutoRetrievalTimeout(verificationId);
+      }
+
       await _authRepository.verifyPhoneNumber(
         event.phoneNumber,
-        event.verificationCompleted,
-        event.verificationFailed,
-        event.codeSent,
-        event.codeAutoRetrievalTimeout,
+        onVerificationCompleted,
+        onVerificationFailed,
+        onCodeSent,
+        onCodeAutoRetrievalTimeout,
       );
     } catch (e) {
       emit(PhoneVerificationError(e.toString()));
     }
   }
 
-  void _onCreateUserProfile(
+  String _friendlyFirebaseAuthMessage(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'invalid-phone-number':
+        return 'Please enter a valid 10-digit Indian mobile number.';
+      case 'operation-not-allowed':
+        return 'Phone sign-in is not enabled in Firebase Authentication. Enable Authentication > Sign-in method > Phone.';
+      case 'too-many-requests':
+        return 'Too many OTP requests. Please wait and try again later.';
+      case 'quota-exceeded':
+        return 'OTP quota is exhausted for this Firebase project.';
+      case 'captcha-check-failed':
+      case 'invalid-verification-id':
+        return 'Phone verification failed. Complete the reCAPTCHA and request OTP again.';
+      case 'invalid-app-credential':
+        return 'Firebase rejected the web app verification. Add just1shop.web.app and just1shop.com in Authentication > Settings > Authorized domains.';
+      case 'session-expired':
+        return 'OTP session expired. Please request OTP again and enter the latest code.';
+      case 'app-not-authorized':
+      case 'missing-client-identifier':
+        return 'This Android app is not authorised for Firebase Phone Auth. Add the app SHA-1/SHA-256 certificate in Firebase, download the updated google-services.json, then rebuild the APK.';
+      case 'invalid-verification-code':
+        return 'Invalid OTP. Enter the latest code from SMS. If this number is configured as a Firebase test number, SMS is not sent and you must use the test code set in Firebase.';
+      case 'network-request-failed':
+        return 'Network error while sending OTP. Check internet connection and try again.';
+      default:
+        return e.message ?? 'Phone verification failed. Please try again.';
+    }
+  }
+
+  Future<void> _onCreateUserProfile(
       CreateUserProfile event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
@@ -199,7 +311,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  void _onLoadUserProfile(
+  Future<void> _onLoadUserProfile(
       LoadUserProfile event, Emitter<AuthState> emit) async {
     try {
       final user = _authRepository.getCurrentUser();
@@ -212,7 +324,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  void _onSignOut(SignOut event, Emitter<AuthState> emit) async {
+  Future<void> _onSignOut(SignOut event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
       await _authRepository.signOut();

@@ -8,9 +8,11 @@ class RouteConstants {
   // Customer Routes
   static const String home = '/home';
   static const String category = '/category';
+  static const String productListing = '/products';
   static const String productDetail = '/product-detail';
   static const String cart = '/cart';
   static const String checkout = '/checkout';
+  static const String wallet = '/wallet';
   static const String address = '/address';
   static const String addAddress = '/add-address';
   static const String orderConfirmation = '/order-confirmation';
@@ -19,6 +21,7 @@ class RouteConstants {
   static const String profile = '/profile';
   static const String search = '/search';
   static const String offers = '/offers';
+  static const String aiAssistant = '/ai-assistant';
 
   // Owner Routes
   static const String ownerLogin = '/owner-login';

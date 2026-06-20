@@ -1,12 +1,173 @@
 {% extends 'base.html' %}
-{% block title %}Add Banner - Admin{% endblock %}
+{% block title %}AI Banner Studio - Admin{% endblock %}
 {% block content %}
-<h2>Add Banner</h2>
-<form method="post">
-  <label>Image URL: <input name="imageUrl"></label><br>
-  <label>Related Products (comma separated or JSON array):</label><br>
-  <textarea name="relatedProducts" rows="3" style="width:100%" placeholder="e.g. 123, 456 or [\"123\", \"456\"]"></textarea>
-  <br>
-  <button type="submit">Add</button>
-</form>
+<h2>AI Banner Studio</h2>
+
+<section class="tool-panel">
+  <h3>Create animated banner from text</h3>
+  <p class="muted">Write the campaign in plain language. The generator will create copy, placement, colors, and animation metadata.</p>
+  <form method="post" class="admin-form banner-grid">
+    <input type="hidden" name="action" value="ai_draft">
+
+    <label class="full-width">
+      Campaign prompt
+      <textarea name="prompt" rows="4" required placeholder="Example: 50% off on rice, dal and atta for Ranchi homes this weekend"></textarea>
+    </label>
+
+    <label>
+      Placement
+      <select name="placement">
+        <option value="home">Home</option>
+        <option value="deals">Deals</option>
+        <option value="fresh">Fresh</option>
+        <option value="rice">Rice</option>
+        <option value="summer">Summer</option>
+        <option value="kirana">Kirana</option>
+        <option value="categories">Categories</option>
+      </select>
+    </label>
+
+    <label>
+      Animation
+      <select name="style">
+        <option value="slide">Slide</option>
+        <option value="shine">Shine</option>
+        <option value="pulse">Pulse</option>
+        <option value="float">Float</option>
+      </select>
+    </label>
+
+    <label>
+      Button text
+      <input name="ctaText" value="Shop Now" maxlength="24">
+    </label>
+
+    <label>
+      Sort order
+      <input name="sortOrder" type="number" value="0">
+    </label>
+
+    <label class="full-width">
+      Link or target
+      <input name="link" placeholder="/home, /category/rice, product id, or external URL">
+    </label>
+
+    <button type="submit">Generate Banner Draft</button>
+  </form>
+</section>
+
+{% if draft %}
+<section class="tool-panel">
+  <h3>Generated preview</h3>
+  <div class="animated-banner-preview {{ draft.animation.style if draft.animation else 'slide' }}"
+       style="--primary: {{ draft.animation.primaryColor }}; --secondary: {{ draft.animation.secondaryColor }}; --accent: {{ draft.animation.accentColor }};">
+    <div>
+      <span class="banner-pill">{{ draft.placement|upper }}</span>
+      <h2>{{ draft.heading or draft.title }}</h2>
+      <p>{{ draft.subtitle }}</p>
+      <strong>{{ draft.ctaText }}</strong>
+    </div>
+  </div>
+
+  <form method="post" class="admin-form banner-grid">
+    <input type="hidden" name="action" value="save_ai">
+    <input type="hidden" name="animation" value='{{ draft.animation|tojson }}'>
+
+    <label>
+      Banner ID
+      <input name="id" value="{{ draft.id }}" required>
+    </label>
+    <label>
+      Placement
+      <input name="placement" value="{{ draft.placement }}" required>
+    </label>
+    <label>
+      Title
+      <input name="title" value="{{ draft.title }}" required>
+    </label>
+    <label>
+      Heading
+      <input name="heading" value="{{ draft.heading }}" required>
+    </label>
+    <label class="full-width">
+      Subtitle
+      <textarea name="subtitle" rows="2">{{ draft.subtitle }}</textarea>
+    </label>
+    <label>
+      CTA text
+      <input name="ctaText" value="{{ draft.ctaText }}">
+    </label>
+    <label>
+      Type
+      <select name="type">
+        <option value="category" {% if draft.type == 'category' %}selected{% endif %}>Category</option>
+        <option value="product" {% if draft.type == 'product' %}selected{% endif %}>Product</option>
+        <option value="external" {% if draft.type == 'external' %}selected{% endif %}>External</option>
+      </select>
+    </label>
+    <label class="full-width">
+      Image URL
+      <input name="image" value="{{ draft.image }}" required>
+    </label>
+    <label class="full-width">
+      Link or target
+      <input name="link" value="{{ draft.link }}">
+    </label>
+    <label>
+      Sort order
+      <input name="sortOrder" type="number" value="{{ draft.sortOrder }}">
+    </label>
+    <label class="checkbox-row">
+      <input name="isActive" type="checkbox" checked>
+      Active
+    </label>
+    <label class="full-width">
+      Related Products
+      <textarea name="relatedProducts" rows="2" placeholder="Comma separated product ids"></textarea>
+    </label>
+
+    <button type="submit">Save Animated Banner</button>
+  </form>
+</section>
+{% endif %}
+
+<section class="tool-panel">
+  <h3>Manual banner</h3>
+  <form method="post" class="admin-form banner-grid">
+    <input type="hidden" name="action" value="save_manual">
+    <label>
+      Banner ID
+      <input name="id" placeholder="optional-custom-id">
+    </label>
+    <label>
+      Title
+      <input name="title" placeholder="Summer Madness">
+    </label>
+    <label>
+      Placement
+      <input name="placement" value="home">
+    </label>
+    <label>
+      Sort order
+      <input name="sortOrder" type="number" value="0">
+    </label>
+    <label class="full-width">
+      Image URL
+      <input name="image" placeholder="https://...">
+    </label>
+    <label class="full-width">
+      Link
+      <input name="link" placeholder="/home or product/category target">
+    </label>
+    <label class="full-width">
+      Related Products
+      <textarea name="relatedProducts" rows="3" placeholder="123, 456 or [&quot;123&quot;, &quot;456&quot;]"></textarea>
+    </label>
+    <label class="checkbox-row">
+      <input name="isActive" type="checkbox" checked>
+      Active
+    </label>
+    <button type="submit">Save Manual Banner</button>
+  </form>
+</section>
 {% endblock %}

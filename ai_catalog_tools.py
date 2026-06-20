@@ -23,6 +23,15 @@ CATEGORY_KEYWORDS = {
     "personal-care": ("soap", "shampoo", "cream", "toothpaste", "oil"),
 }
 
+BANNER_PALETTES = {
+    "deals": ("#0F46D9", "#3B82F6", "#FACC15"),
+    "fresh": ("#047857", "#10B981", "#ECFDF5"),
+    "rice": ("#B7791F", "#F59E0B", "#FFF7ED"),
+    "summer": ("#0284C7", "#22D3EE", "#FEF3C7"),
+    "kirana": ("#1D4ED8", "#60A5FA", "#DBEAFE"),
+    "default": ("#111827", "#2563EB", "#FFFFFF"),
+}
+
 
 def now_utc() -> datetime:
     return datetime.now(timezone.utc)
@@ -188,6 +197,77 @@ def delivery_zone_payload(raw: dict[str, Any]) -> dict[str, Any]:
         "minimumOrder": float(raw.get("minimumOrder") or 0),
         "estimatedMinutes": int(raw.get("estimatedMinutes") or 60),
         "storeId": str(raw.get("storeId") or ""),
+        "createdAt": raw.get("createdAt") or now_utc(),
+        "updatedAt": now_utc(),
+    }
+
+
+def banner_from_prompt(raw: dict[str, Any]) -> dict[str, Any]:
+    prompt = " ".join(str(raw.get("prompt") or raw.get("text") or "").split())
+    if len(prompt) < 3:
+        raise ValueError("Banner prompt must describe the offer or campaign")
+
+    placement = str(raw.get("placement") or infer_category(prompt)).strip().lower()
+    style = str(raw.get("style") or "slide").strip().lower()
+    palette_key = placement if placement in BANNER_PALETTES else infer_category(prompt)
+    primary, secondary, accent = BANNER_PALETTES.get(palette_key, BANNER_PALETTES["default"])
+
+    discount = re.search(r"(\d{1,2})\s*%|\b(?:rs\.?|₹|inr)\s*(\d{1,4})", prompt, re.I)
+    offer = ""
+    if discount:
+        offer = discount.group(0).replace("rs.", "Rs").replace("inr", "Rs").strip()
+
+    clean_prompt = prompt.rstrip(".")
+    title = str(raw.get("title") or "").strip()
+    if not title:
+        if offer:
+            title = f"{offer} Just1Shop Offer"
+        elif any(word in prompt.lower() for word in ("fresh", "fruit", "vegetable")):
+            title = "Fresh Picks Today"
+        elif any(word in prompt.lower() for word in ("rice", "dal", "atta")):
+            title = "Daily Staples Deal"
+        else:
+            title = "Just1Shop Special"
+
+    subtitle = str(raw.get("subtitle") or "").strip()
+    if not subtitle:
+        subtitle = clean_prompt[:96]
+
+    cta = str(raw.get("ctaText") or raw.get("cta") or "Shop Now").strip() or "Shop Now"
+    banner_id = str(raw.get("id") or slugify(f"{title}-{placement}-{style}"))
+    image = str(raw.get("image") or raw.get("imageUrl") or DEFAULT_PRODUCT_IMAGE)
+
+    return {
+        "id": banner_id,
+        "title": title[:72],
+        "heading": title[:72],
+        "subtitle": subtitle[:120],
+        "description": clean_prompt,
+        "ctaText": cta[:24],
+        "image": image,
+        "imageUrl": image,
+        "imgUrl": image,
+        "type": str(raw.get("type") or "category"),
+        "link": str(raw.get("link") or ""),
+        "placement": placement,
+        "targetSection": placement,
+        "isActive": bool(raw.get("isActive", True)),
+        "sortOrder": int(raw.get("sortOrder") or 0),
+        "relatedProducts": raw.get("relatedProducts") or [],
+        "animation": {
+            "enabled": True,
+            "style": style if style in {"slide", "pulse", "shine", "float"} else "slide",
+            "durationMs": int(raw.get("durationMs") or 3600),
+            "primaryColor": primary,
+            "secondaryColor": secondary,
+            "accentColor": accent,
+        },
+        "ai": {
+            "source": "banner_prompt",
+            "prompt": prompt,
+            "generatedAt": now_utc(),
+            "suggestedPlacements": [placement, "home", "deals"],
+        },
         "createdAt": raw.get("createdAt") or now_utc(),
         "updatedAt": now_utc(),
     }

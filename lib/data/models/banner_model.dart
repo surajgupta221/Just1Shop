@@ -5,6 +5,10 @@ class BannerModel {
   final String image;
   final String? link;
   final String type; // 'product', 'category', 'external'
+  final String? subtitle;
+  final String? ctaText;
+  final String placement;
+  final Map<String, dynamic>? animation;
   final bool isActive;
   final int sortOrder;
   final DateTime createdAt;
@@ -16,6 +20,10 @@ class BannerModel {
     required this.image,
     this.link,
     required this.type,
+    this.subtitle,
+    this.ctaText,
+    this.placement = 'home',
+    this.animation,
     required this.isActive,
     required this.sortOrder,
     required this.createdAt,
@@ -29,6 +37,10 @@ class BannerModel {
       'image': image,
       'link': link,
       'type': type,
+      'subtitle': subtitle,
+      'ctaText': ctaText,
+      'placement': placement,
+      'animation': animation,
       'isActive': isActive,
       'sortOrder': sortOrder,
       'createdAt': createdAt,
@@ -39,10 +51,16 @@ class BannerModel {
   factory BannerModel.fromMap(Map<String, dynamic> map) {
     return BannerModel(
       id: map['id'] ?? '',
-      title: map['title'] ?? '',
-      image: map['image'] ?? '',
+      title: map['title'] ?? map['heading'] ?? '',
+      image: map['image'] ?? map['imageUrl'] ?? map['imgUrl'] ?? '',
       link: map['link'],
       type: map['type'] ?? 'external',
+      subtitle: map['subtitle'] ?? map['description'],
+      ctaText: map['ctaText'] ?? map['cta'],
+      placement: map['placement'] ?? map['targetSection'] ?? 'home',
+      animation: map['animation'] is Map
+          ? Map<String, dynamic>.from(map['animation'])
+          : null,
       isActive: map['isActive'] ?? true,
       sortOrder: map['sortOrder']?.toInt() ?? 0,
       createdAt: map['createdAt']?.toDate() ?? DateTime.now(),
