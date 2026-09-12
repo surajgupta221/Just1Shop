@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Just1Shop - Instant Grocery Delivery Online | Fresh Produce, Dairy & Snacks</title>
+    
+    <!-- Primary SEO Meta Tags for Google Search -->
+    <meta name="title" content="Just1Shop - Instant Grocery Delivery Online" />
+    <meta name="description" content="Order fresh groceries online on Just1Shop. 8-minute delivery for fresh vegetables, fruits, dairy, bread, munchies, beverages, and daily household essentials at lowest prices." />
+    <meta name="keywords" content="Just1Shop, online grocery, 10 min delivery, instant grocery shopping, fresh vegetables, milk delivery, Zepto, Blinkit, Flipkart Grocery, supermarket online" />
+    <meta name="author" content="Just1Shop Quick Commerce" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="theme-color" content="#0c831f" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Open Graph / Facebook / WhatsApp Preview -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://just1shop.com/" />
+    <meta property="og:title" content="Just1Shop - Fresh Groceries Delivered in 8 Mins" />
+    <meta property="og:description" content="Fresh veggies, milk, snacks, and daily essentials delivered fast. Best prices and instant doorstep delivery." />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&auto=format&fit=crop&q=80" />
+    <meta property="og:site_name" content="Just1Shop" />
+
+    <!-- Twitter Cards -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="Just1Shop - Online Grocery Supermarket" />
+    <meta property="twitter:description" content="Order fresh vegetables, fruits, snacks, and dairy delivered in 8 mins." />
+    <meta property="twitter:image" content="https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&auto=format&fit=crop&q=80" />
+
+    <!-- Google Structured Data (JSON-LD) for Rich Results -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "GroceryStore",
+      "name": "Just1Shop",
+      "image": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200&auto=format&fit=crop&q=80",
+      "description": "Just1Shop is a premier quick-commerce online grocery shopping application delivering fresh produce, dairy, bakery, snacks, and household essentials in minutes.",
+      "telephone": "+1-800-JUST1SHOP",
+      "priceRange": "$$",
+      "currenciesAccepted": "USD, INR",
+      "paymentAccepted": "Cash, Credit Card, UPI, Net Banking",
+      "openingHours": "Mo-Su 06:00-23:59",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://just1shop.com/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              quickGreen: {
+                50: '#f0fdf4',
+                100: '#dcfce7',
+                500: '#22c55e',
+                600: '#16a34a',
+                700: '#0c831f',
+                800: '#166534',
+                900: '#14532d',
+              },
+              quickYellow: {
+                400: '#facc15',
+                500: '#f4c430',
+                600: '#eab308',
+              },
+              brandBlue: {
+                600: '#2563eb',
+                700: '#1d4ed8',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="/index.css">
+  </head>
+  <body class="bg-gray-100 text-gray-900 antialiased selection:bg-green-100 selection:text-green-900 pb-20 md:pb-0">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

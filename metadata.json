@@ -1,0 +1,6 @@
+{
+  "name": "Just1Shop",
+  "description": "Just1Shop is a premier quick-commerce online grocery shopping application delivering fresh produce, dairy, bakery, snacks, and household essentials in minutes, featuring real-time catalog syncing and smart delivery address routing.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
